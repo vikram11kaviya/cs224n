@@ -115,6 +115,9 @@ class NMT(nn.Module):
 
         enc_hiddens, dec_init_state = self.encode(source_padded, source_lengths)
         enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)
+        # above mask are used in calculation of attention for the pad tokens set e_t to very small
+        # so that the softmax assigns 0 value to pads in the "step" function 
+        # and pad dont get any weight in attention output
         combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded)
         # vocab_projection has shape tgt_len,b,tgt_vocab_size so softmax in last dim
         P = F.log_softmax(self.target_vocab_projection(combined_outputs), dim=-1)
